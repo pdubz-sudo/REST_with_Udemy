@@ -1,0 +1,41 @@
+class Item(Resource):      # the class should be capital IT
+    def get(self, name):
+        for item in items:
+            if item["name"] == name:
+                return item
+        return {"item": None}, 404 # STATUS CODE: added 404 because it means not found and if you don't add it the status code
+                                   # would be 200 which is wrong
+
+    def post(self, name):
+        data = request.get_json()
+        item = {"name": name, "price": data["price"]}
+        items.append(item)
+        return item, 201
+
+
+
+Improving above code (look below)
+
+class Item(Resource):
+    def get(self, name):
+        # looks like x would be items and lamda loops through them IT. Filter function has 2 arguments.
+        # filter return filter object that methods can be called upon.
+        # So, you can do list(filter(lambda x: x["name"] == name, items)) if you wanted to return a list.
+        # since you only want 1 item for this exercise you can do next which will pull up first item.
+        # you can call next again by calling over and over and over if you want.
+        # it can also raise and error if there are no more items left. So, you need to break it with None:  code: next(xxxx,None)
+        item = next(filter(lambda x: x["name"] == name, items), None)
+        return {"item": item}, 200 if item else 404     # STATUS CODE: if item exists and 404 if it doesn't
+
+
+        def post(self, name):
+            if next(filter(lambda x: x["name"] == name, items), None) is not None:   # finds if an item matches the name; already exists.
+                return {"message": "An item with name '{}' already exists.".format(name)}, 400   # STATUS CODE: 400 bad request, request for name already in server. Clients fault.
+            data = request.get_json()  # request will have a JSON body attached to it. Request must have JSON body
+                                   # or header conten type must be json
+            # If your not sure it your clients are going to give you JSON or not you can prevent from giving an error
+            # data = request.get_json(force=True)  # will not look at header which maybe isn't good
+            # data = request.get_json(silent=True) # won't return an error but just returns none
+            item = {"name": name, "price": data["price"]}
+            items.append(item)
+            return item, 201 # STATUS CODE: for when an object is created and added to the database
